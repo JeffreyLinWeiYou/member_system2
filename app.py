@@ -20,7 +20,7 @@ Base = declarative_base()
 
 parser = reqparse.RequestParser()
 parser.add_argument('id', type=int)
-parser.add_argument('email', type=str)
+parser.add_argument('username', type=str)
 parser.add_argument('password', type=str)
 parser.add_argument('telephone', type=str)
 parser.add_argument('extra', type=str)
@@ -28,17 +28,17 @@ parser.add_argument('extra', type=str)
 class Users(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    email = Column(String(32))
+    username = Column(String(32))
     password = Column(String(32))
     telephone = Column(String(32))
     extra = Column(Text)
 
-    def __init__(self, id, email, password, telephone, extra):
-        self.id = id
-        self.email = email
+    def __init__(self, username, password):
+        # self.id = id
+        self.username = username
         self.password = password
-        self.telephone = telephone
-        self.extra = extra
+        # self.telephone = telephone
+        # self.extra = extra
 
 def init_db():
     Base.metadata.create_all(engine)
@@ -65,15 +65,25 @@ def login():
     else:
         name = request.form['username']
         passw = request.form['password']
-        try:
-            data = Users.query.filter_by(username=name, password=passw).first()
-            if data is not None:
-                session['logged_in'] = True
-                return redirect(url_for('home'))
-            else:
-                return 'Dont Login'
-        except:
-            return "Dont Login"
+        # try:
+        data = session_db.query.filter(Users.username == name, Users.password == passw).first()
+        if data is not None:
+            session['logged_in'] = True
+            return redirect(url_for('home'))
+        else:
+            return 'Dont Login'
+        # except:
+        #     return "Dont Login"
+
+@app.route('/register/',methods=['GET', 'POST'])
+def register():
+    """Register Form"""
+    if request.method == 'POST':
+        new_user = Users(username=request.form['username'], password=request.form['password'])
+        session_db.add(new_user)
+        session_db.commit()
+        return render_template('login.html')
+    return render_template('register.html')
 
 
 if __name__ == '__main__':
