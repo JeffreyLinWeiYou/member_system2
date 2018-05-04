@@ -4,7 +4,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy import create_engine, func
-from flask_restful import reqparse
 
 DB_URI = "mysql+pymysql://root:@127.0.0.1:3306/member"
 Session = sessionmaker(autocommit=False,
@@ -17,17 +16,27 @@ engine = create_engine(DB_URI, max_overflow=5)
 
 Base = declarative_base()
 
-parser = reqparse.RequestParser()
-parser.add_argument('id', type=int)
-parser.add_argument('username', type=str)
-parser.add_argument('password', type=str)
-parser.add_argument('email', type=str)
-parser.add_argument('telephone', type=str)
-parser.add_argument('extra', type=str)
-
 
 class Users(Base):
     __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(32))
+    password = Column(String(32))
+    email = Column(String(32))
+    telephone = Column(String(32))
+    extra = Column(Text)
+
+    def __init__(self, id, username, password, email, telephone, extra):
+        self.id = id
+        self.username = username
+        self.password = password
+        self.email = email
+        self.telephone = telephone
+        self.extra = extra
+
+
+class Administrator(Base):
+    __tablename__ = 'administrator'
     id = Column(Integer, primary_key=True)
     username = Column(String(32))
     password = Column(String(32))
@@ -57,20 +66,39 @@ def home():
     if not session.get('logged_in'):
         return render_template('index.html')
     else:
-        if request.method == 'POST':
-            user = session_db.query(Users).filter(Users.username == session['username']).first()
-            user.password = request.form['password']
-            session['password']=request.form['password']
-            user.email = request.form['email']
-            user.telephone = request.form['telephone']
-            user.extra = request.form['extra']
-            session_db.commit()
-            return render_template('index.html',data=session['username'], password=user.password,
-                                   email=user.email, telephone=user.telephone,
-                                   extra=user.extra)
-        data_username = session_db.query(Users).filter(Users.username == session['username']).first()
-        return render_template('index.html',data=data_username.username, password=data_username.password,
-                               email=data_username.email, telephone=data_username.telephone, extra=data_username.extra)
+        if session['identity'] == 'member':
+            if request.method == 'POST':
+                user = session_db.query(Users).filter(Users.username == session['username']).first()
+                user.password = request.form['password']
+                session['password'] = request.form['password']
+                user.email = request.form['email']
+                user.telephone = request.form['telephone']
+                user.extra = request.form['extra']
+                session_db.commit()
+                return render_template('index.html', data=session['username'], password=user.password,
+                                       email=user.email, telephone=user.telephone,
+                                       extra=user.extra, identity=session['identity'])
+            data_username = session_db.query(Users).filter(Users.username == session['username']).first()
+            return render_template('index.html', data=data_username.username, password=data_username.password,
+                                   email=data_username.email, telephone=data_username.telephone,
+                                   extra=data_username.extra, identity=session['identity'])
+        else:
+            if request.method == 'POST':
+                user = session_db.query(Administrator).filter(Administrator.username == session['username']).first()
+                user.password = request.form['password']
+                session['password'] = request.form['password']
+                user.email = request.form['email']
+                user.telephone = request.form['telephone']
+                user.extra = request.form['extra']
+                session_db.commit()
+                return render_template('index.html', data=session['username'], password=user.password,
+                                       email=user.email, telephone=user.telephone,
+                                       extra=user.extra, identity=session['identity'])
+            data_username = session_db.query(Administrator).filter(
+                Administrator.username == session['username']).first()
+            return render_template('index.html', data=data_username.username, password=data_username.password,
+                                   email=data_username.email, telephone=data_username.telephone,
+                                   extra=data_username.extra, identity=session['identity'])
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -80,36 +108,68 @@ def login():
     else:
         name = request.form['username']
         passw = request.form['password']
+        if session['identity'] == 'member':
 
-        data_username = session_db.query(Users).filter(Users.username == name).first()
-        if data_username is not None:
-            data_username_passw = session_db.query(Users).filter(Users.username == name,
-                                                                 Users.password == passw).first()
-            if data_username_passw is not None:
-                session['logged_in'] = True
-                session['username'] = name
-                session['password'] = passw
-                data_username = session_db.query(Users).filter(Users.username == session['username']).first()
-                return render_template('index.html', username=data_username.username, password=data_username.password,
-                                       email=data_username.email, telephone=data_username.telephone,
-                                       extra=data_username.extra)
+            data_username = session_db.query(Users).filter(Users.username == name).first()
+            if data_username is not None:
+                data_username_passw = session_db.query(Users).filter(Users.username == name,
+                                                                     Users.password == passw).first()
+                if data_username_passw is not None:
+                    session['logged_in'] = True
+                    session['username'] = name
+                    session['password'] = passw
+                    data_username = session_db.query(Users).filter(Users.username == session['username']).first()
+                    return render_template('index.html', username=data_username.username,
+                                           password=data_username.password,
+                                           email=data_username.email, telephone=data_username.telephone,
+                                           extra=data_username.extra)
+                else:
+                    return 'Username Exist,but password error'
+
             else:
-                return 'Username Exist,but password error'
-
+                return 'Username Error'
         else:
-            return 'Username Error'
+            data_username = session_db.query(Administrator).filter(Administrator.username == name).first()
+            if data_username is not None:
+                data_username_passw = session_db.query(Administrator).filter(Administrator.username == name,
+                                                                             Administrator.password == passw).first()
+                if data_username_passw is not None:
+                    session['logged_in'] = True
+                    session['username'] = name
+                    session['password'] = passw
+                    data_username = session_db.query(Administrator).filter(
+                        Administrator.username == session['username']).first()
+                    return render_template('index.html', username=data_username.username,
+                                           password=data_username.password,
+                                           email=data_username.email, telephone=data_username.telephone,
+                                           extra=data_username.extra)
+                else:
+                    return 'Username Exist,but password error'
+
+            else:
+                return 'Username Error'
 
 
 @app.route('/register/', methods=['GET', 'POST'])
 def register():
     """Register Form"""
     if request.method == 'POST':
-        rows = session_db.query(func.count(Users.id)).scalar()
-
-        new_user = Users(id=rows + 1, username=request.form['username'], password=request.form['password'],
-                         email=request.form['email'], telephone=request.form['telephone'], extra=request.form['extra'])
-        session_db.add(new_user)
-        session_db.commit()
+        identity = request.form['identity']
+        session['identity'] = identity
+        if identity == 'member':
+            rows = session_db.query(func.count(Users.id)).scalar()
+            new_user = Users(id=rows + 1, username=request.form['username'], password=request.form['password'],
+                             email=request.form['email'], telephone=request.form['telephone'],
+                             extra=request.form['extra'])
+            session_db.add(new_user)
+            session_db.commit()
+        else:
+            rows = session_db.query(func.count(Administrator.id)).scalar()
+            new_user = Administrator(id=rows + 1, username=request.form['username'], password=request.form['password'],
+                                     email=request.form['email'], telephone=request.form['telephone'],
+                                     extra=request.form['extra'])
+            session_db.add(new_user)
+            session_db.commit()
         return render_template('login.html')
     return render_template('register.html')
 
@@ -119,6 +179,8 @@ def logout():
     session['logged_in'] = False
     session['username'] = 'Null'
     session['password'] = 'Null'
+    session['identity'] = 'Null'
+
     return redirect(url_for('home'))
 
 

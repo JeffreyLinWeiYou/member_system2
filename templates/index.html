@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% block content %} {% if session['logged_in'] %}
-<h3>{{data}}</h3>
+<h2>identity:{{identity}}</h2>
+<h3>username:{{data}}</h3>
+
 <a href="/logout">Logout</a>
 <br>
 <br>

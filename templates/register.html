@@ -2,6 +2,7 @@
 <p>Oh no Dont show page</p>
 {% else %}
 <h2>Register</h2>
+
 <form action="/register/" method="POST">
     <p>username:</p>
     <input type="username" name="username" placeholder="Username" required="required">
@@ -18,6 +19,9 @@
     <p>extra:</p>
     <input type="text" name="extra" placeholder="extra" required="required">
     <br/>
-    <input type="submit" value="Log in">
+    <input type="radio" name="identity" value="member" checked>member<br>
+    <input type="radio" name="identity" value="administrator">administrator<br>
+    <br/>
+    <input type="submit" value="Register">
 </form>
 {% endif %} {% endblock %}
