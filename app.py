@@ -3,7 +3,7 @@ from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Text
-from sqlalchemy import create_engine,func
+from sqlalchemy import create_engine, func
 from flask_restful import reqparse
 
 DB_URI = "mysql+pymysql://root:@127.0.0.1:3306/member"
@@ -22,7 +22,7 @@ parser.add_argument('id', type=int)
 parser.add_argument('username', type=str)
 parser.add_argument('password', type=str)
 parser.add_argument('email', type=str)
-parser.add_argument('telephone', type=int)
+parser.add_argument('telephone', type=str)
 parser.add_argument('extra', type=str)
 
 
@@ -32,7 +32,7 @@ class Users(Base):
     username = Column(String(32))
     password = Column(String(32))
     email = Column(String(32))
-    telephone = Column(Integer)
+    telephone = Column(String(32))
     extra = Column(Text)
 
     def __init__(self, id, username, password, email, telephone, extra):
@@ -58,11 +58,19 @@ def home():
         return render_template('index.html')
     else:
         if request.method == 'POST':
-            parser = reqparse.RequestParser()
-            parsed_args = parser.parse_args()
-            email = parsed_args['email']
-            return 'aaa'
-        return render_template('index.html')
+            user = session_db.query(Users).filter(Users.username == session['username']).first()
+            user.password = request.form['password']
+            session['password']=request.form['password']
+            user.email = request.form['email']
+            user.telephone = request.form['telephone']
+            user.extra = request.form['extra']
+            session_db.commit()
+            return render_template('index.html',data=session['username'], password=user.password,
+                                   email=user.email, telephone=user.telephone,
+                                   extra=user.extra)
+        data_username = session_db.query(Users).filter(Users.username == session['username']).first()
+        return render_template('index.html',data=data_username.username, password=data_username.password,
+                               email=data_username.email, telephone=data_username.telephone, extra=data_username.extra)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -75,10 +83,16 @@ def login():
 
         data_username = session_db.query(Users).filter(Users.username == name).first()
         if data_username is not None:
-            data_username_passw = session_db.query(Users).filter(Users.username == name,Users.password==passw).first()
+            data_username_passw = session_db.query(Users).filter(Users.username == name,
+                                                                 Users.password == passw).first()
             if data_username_passw is not None:
                 session['logged_in'] = True
-                return redirect(url_for('home'))
+                session['username'] = name
+                session['password'] = passw
+                data_username = session_db.query(Users).filter(Users.username == session['username']).first()
+                return render_template('index.html', username=data_username.username, password=data_username.password,
+                                       email=data_username.email, telephone=data_username.telephone,
+                                       extra=data_username.extra)
             else:
                 return 'Username Exist,but password error'
 
@@ -92,7 +106,7 @@ def register():
     if request.method == 'POST':
         rows = session_db.query(func.count(Users.id)).scalar()
 
-        new_user = Users(id=rows+1,username=request.form['username'], password=request.form['password'],
+        new_user = Users(id=rows + 1, username=request.form['username'], password=request.form['password'],
                          email=request.form['email'], telephone=request.form['telephone'], extra=request.form['extra'])
         session_db.add(new_user)
         session_db.commit()
@@ -103,6 +117,8 @@ def register():
 @app.route('/logout')
 def logout():
     session['logged_in'] = False
+    session['username'] = 'Null'
+    session['password'] = 'Null'
     return redirect(url_for('home'))
 
 

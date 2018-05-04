@@ -3,14 +3,19 @@
 {% else %}
 <h2>Register</h2>
 <form action="/register/" method="POST">
+    <p>username:</p>
     <input type="username" name="username" placeholder="Username" required="required">
     <br/>
+    <p>password:</p>
     <input type="password" name="password" placeholder="Password" required="required">
     <br/>
+    <p>email:</p>
     <input type="email" name="email" placeholder="email" required="required">
     <br/>
-    <input type="tel" name="telephone" placeholder="telephone" required="required">
+    <p>telephone:</p>
+    <input type="telephone" name="telephone" placeholder="telephone" required="required">
     <br/>
+    <p>extra:</p>
     <input type="text" name="extra" placeholder="extra" required="required">
     <br/>
     <input type="submit" value="Log in">

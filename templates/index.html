@@ -1,13 +1,25 @@
-{% extends "base.html" %} {% block content %} {% if session['logged_in'] %} {% if data %}
-<h3>{{data}}</h3> {% else %}
+{% extends "base.html" %} {% block content %} {% if session['logged_in'] %}
+<h3>{{data}}</h3>
 <a href="/logout">Logout</a>
 <br>
 <br>
 <form action="" method="POST">
-    <input type="username" name="username" placeholder="Instagram Username">
-    <input type="submit" value="Finds">
+    <p>password:</p>
+    <input type="password" name="password" value="{{password}}" required="required">
+    <br/>
+    <p>email:</p>
+    <input type="email" name="email" value="{{email}}" required="required">
+    <br/>
+    <p>telephone:</p>
+    <input type="tel" name="telephone" value="{{telephone}}" required="required">
+    <br/>
+    <p>extra:</p>
+    <input type="text" name="extra" value="{{extra}}" required="required">
+    <br/>
+    <input type="submit" value="modify">
+
 </form>
-{% endif %} {% else %}
+{% else %}
 <p>Not login!</p>
 <a href="/login">Login</a>
 <br/>
