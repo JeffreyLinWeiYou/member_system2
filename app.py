@@ -108,7 +108,8 @@ def login():
     else:
         name = request.form['username']
         passw = request.form['password']
-        if session['identity'] == 'member':
+        identity = request.form['identity']
+        if identity == 'member':
 
             data_username = session_db.query(Users).filter(Users.username == name).first()
             if data_username is not None:
@@ -118,11 +119,13 @@ def login():
                     session['logged_in'] = True
                     session['username'] = name
                     session['password'] = passw
+                    session['identity'] = 'member'
+
                     data_username = session_db.query(Users).filter(Users.username == session['username']).first()
                     return render_template('index.html', username=data_username.username,
                                            password=data_username.password,
                                            email=data_username.email, telephone=data_username.telephone,
-                                           extra=data_username.extra)
+                                           extra=data_username.extra, identity=session['identity'])
                 else:
                     return 'Username Exist,but password error'
 
@@ -137,12 +140,14 @@ def login():
                     session['logged_in'] = True
                     session['username'] = name
                     session['password'] = passw
+                    session['identity'] = 'administrator'
+
                     data_username = session_db.query(Administrator).filter(
                         Administrator.username == session['username']).first()
                     return render_template('index.html', username=data_username.username,
                                            password=data_username.password,
                                            email=data_username.email, telephone=data_username.telephone,
-                                           extra=data_username.extra)
+                                           extra=data_username.extra, identity=session['identity'])
                 else:
                     return 'Username Exist,but password error'
 

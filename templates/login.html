@@ -5,6 +5,10 @@
 <form action="/login" method="POST">
     <input type="username" name="username" placeholder="Username" required="required">
     <input type="password" name="password" placeholder="Password" required="required">
+    <br/>
+    <input type="radio" name="identity" value="member" checked>member<br>
+    <input type="radio" name="identity" value="administrator">administrator<br>
+    <br/>
     <input type="submit" value="Log in">
 </form>
 {% endif %} {% endblock %}
