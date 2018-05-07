@@ -75,11 +75,11 @@ def home():
                 user.telephone = request.form['telephone']
                 user.extra = request.form['extra']
                 session_db.commit()
-                return render_template('index.html', data=session['username'], password=user.password,
+                return render_template('index.html', username=session['username'], password=user.password,
                                        email=user.email, telephone=user.telephone,
                                        extra=user.extra, identity=session['identity'])
             data_username = session_db.query(Users).filter(Users.username == session['username']).first()
-            return render_template('index.html', data=data_username.username, password=data_username.password,
+            return render_template('index.html', username=data_username.username, password=data_username.password,
                                    email=data_username.email, telephone=data_username.telephone,
                                    extra=data_username.extra, identity=session['identity'])
         else:
@@ -91,12 +91,12 @@ def home():
                 user.telephone = request.form['telephone']
                 user.extra = request.form['extra']
                 session_db.commit()
-                return render_template('index.html', data=session['username'], password=user.password,
+                return render_template('index.html', username=session['username'], password=user.password,
                                        email=user.email, telephone=user.telephone,
                                        extra=user.extra, identity=session['identity'])
             data_username = session_db.query(Administrator).filter(
                 Administrator.username == session['username']).first()
-            return render_template('index.html', data=data_username.username, password=data_username.password,
+            return render_template('index.html', username=data_username.username, password=data_username.password,
                                    email=data_username.email, telephone=data_username.telephone,
                                    extra=data_username.extra, identity=session['identity'])
 
@@ -122,7 +122,7 @@ def login():
                     session['identity'] = 'member'
 
                     data_username = session_db.query(Users).filter(Users.username == session['username']).first()
-                    return render_template('index.html', username=data_username.username,
+                    return render_template('index.html', username=session['username'],
                                            password=data_username.password,
                                            email=data_username.email, telephone=data_username.telephone,
                                            extra=data_username.extra, identity=session['identity'])
@@ -144,7 +144,7 @@ def login():
 
                     data_username = session_db.query(Administrator).filter(
                         Administrator.username == session['username']).first()
-                    return render_template('index.html', username=data_username.username,
+                    return render_template('index.html', username=session['username'],
                                            password=data_username.password,
                                            email=data_username.email, telephone=data_username.telephone,
                                            extra=data_username.extra, identity=session['identity'])
@@ -188,6 +188,19 @@ def logout():
 
     return redirect(url_for('home'))
 
+@app.route('/modify', methods=['GET', 'POST'])
+def modify():
+    if request.method == 'GET':
+        user = session_db.query(Users).all()
+        return render_template('modify.html',users=user)
+    if request.method == 'POST':
+        user = session_db.query(Users).all()
+        for i in range(len(user)):
+            user[i].email = request.form['email'+str(i+1)]
+            user[i].telephone = request.form['telephone'+str(i+1)]
+            user[i].extra = request.form['extra'+str(i+1)]
+        session_db.commit()
+        return redirect(url_for('modify'))
 
 if __name__ == '__main__':
     if __name__ == '__main__':

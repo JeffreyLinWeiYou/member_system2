@@ -1,9 +1,12 @@
 {% extends "base.html" %} {% block content %} {% if session['logged_in'] %}
 <h2>identity:{{identity}}</h2>
-<h3>username:{{data}}</h3>
+<h3>username:{{username}}</h3>
 
 <a href="/logout">Logout</a>
 <br>
+{% if 'administrator' == identity%}
+<a href="/modify">Modify member</a>
+{% endif %}
 <br>
 <form action="" method="POST">
     <p>password:</p>
@@ -21,6 +24,8 @@
     <input type="submit" value="modify">
 
 </form>
+
+
 {% else %}
 <p>Not login!</p>
 <a href="/login">Login</a>
