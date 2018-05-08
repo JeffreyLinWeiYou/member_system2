@@ -1,27 +1,56 @@
 {% extends "base.html" %} {% block content %} {% if session['logged_in'] %}
-<p>Oh no Dont show page</p>
+<div class="page-header">
+    <h1>
+        Oh no Dont show page
+    </h1>
+</div>
 {% else %}
-<h2>Register</h2>
-
-<form action="/register/" method="POST">
-    <p>username:</p>
-    <input type="username" name="username" placeholder="Username" required="required">
-    <br/>
-    <p>password:</p>
-    <input type="password" name="password" placeholder="Password" required="required">
-    <br/>
-    <p>email:</p>
-    <input type="email" name="email" placeholder="email" required="required">
-    <br/>
-    <p>telephone:</p>
-    <input type="telephone" name="telephone" placeholder="telephone" required="required">
-    <br/>
-    <p>extra:</p>
-    <input type="text" name="extra" placeholder="extra" required="required">
-    <br/>
-    <input type="radio" name="identity" value="member" checked>member<br>
-    <input type="radio" name="identity" value="administrator">administrator<br>
-    <br/>
-    <input type="submit" value="Register">
+<div class="page-header">
+    <h1>
+        Register
+    </h1>
+</div>
+<form role="form" action="/register/" method="POST">
+    <div class="form-group">
+        <label for="exampleInputUsername1">
+            Username
+        </label>
+        <input type="username" class="form-control" id="exampleInputUsername1" name="username" placeholder="Username" required="required">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">
+            Password
+        </label>
+        <input type="password" class="form-control" id="exampleInputPassword1" name="password" placeholder="Password" required="required">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputEmail1">
+            email
+        </label>
+        <input type="email" class="form-control" id="exampleInputEmail1" name="email" value="{{email}}" required="required">
+    </div>
+    <div class="form-group">
+        <label for="exampleTelephone1">
+            telephone
+        </label>
+        <input type="tel" class="form-control" id="exampleTelephone1" name="telephone" value="{{telephone}}" required="required">
+    </div>
+    <div class="form-group">
+        <label for="exampleText1">
+            extra
+        </label>
+        <input type="text" class="form-control" id="exampleText1" name="extra" value="{{extra}}" required="required">
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="radio" name="identity" value="member" checked> member
+            <br>
+            <input type="radio" name="identity" value="administrator">administrator
+            <br>
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary">
+        Register
+    </button>
 </form>
 {% endif %} {% endblock %}

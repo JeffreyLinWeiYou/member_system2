@@ -1,35 +1,78 @@
-{% extends "base.html" %} {% block content %} {% if session['logged_in'] %}
-<h2>identity:{{identity}}</h2>
-<h3>username:{{username}}</h3>
-
-<a href="/logout">Logout</a>
-<br>
-{% if 'administrator' == identity%}
-<a href="/modify">Modify member</a>
-{% endif %}
-<br>
-<form action="" method="POST">
-    <p>password:</p>
-    <input type="password" name="password" value="{{password}}" required="required">
-    <br/>
-    <p>email:</p>
-    <input type="email" name="email" value="{{email}}" required="required">
-    <br/>
-    <p>telephone:</p>
-    <input type="tel" name="telephone" value="{{telephone}}" required="required">
-    <br/>
-    <p>extra:</p>
-    <input type="text" name="extra" value="{{extra}}" required="required">
-    <br/>
-    <input type="submit" value="modify">
-
+{% extends "base.html" %} {% block head %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Home</a>
+                </li>
+                {% if not session['logged_in'] %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Forget Password</a>
+                </li>
+                {% else %} {% if 'administrator' == identity%}
+                <li class="nav-item">
+                    <a class="nav-link" href="/modify">Modify member</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">logout</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block content %} {% if session['logged_in'] %}
+<div class="page-header">
+    <h1>
+        Identity:{{identity}}
+    </h1>
+</div>
+<div class="page-header">
+    <h1>
+        Username:{{username}}
+    </h1>
+</div>
+<form role="form" method="POST">
+    <div class="form-group">
+        <label for="exampleInputPassword1">
+            Password
+        </label>
+        <input type="password" class="form-control" id="exampleInputPassword1" name="password" value="{{password}}" required="required">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputEmail1">
+            email
+        </label>
+        <input type="email" class="form-control" id="exampleInputEmail1" name="email" value="{{email}}" required="required">
+    </div>
+    <div class="form-group">
+        <label for="exampleTelephone1">
+            telephone
+        </label>
+        <input type="tel" class="form-control" id="exampleTelephone1" name="telephone" value="{{telephone}}" required="required">
+    </div>
+    <div class="form-group">
+        <label for="exampleText1">
+            extra
+        </label>
+        <input type="text" class="form-control" id="exampleText1" name="extra" value="{{extra}}" required="required">
+    </div>
+    <button type="submit" class="btn btn-primary">
+        modify
+    </button>
 </form>
-
-
 {% else %}
-<p>Not login!</p>
-<a href="/login">Login</a>
-<br/>
-<a href="/register">Register</a>
-<br/>
-<a href="/forget_password">forget password</a> {% endif %} {% endblock %}
+<div class="page-header">
+    <h1>
+        Not login!
+    </h1>
+</div>
+{% endif %} {% endblock %}

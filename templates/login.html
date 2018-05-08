@@ -1,14 +1,42 @@
-{% extends "base.html" %} {% block content %} {% if session['logged_in'] %}
-<p>You're logged in already!</p>
-{% else %}
-<h2>Login</h2>
-<form action="/login" method="POST">
-    <input type="username" name="username" placeholder="Username" required="required">
-    <input type="password" name="password" placeholder="Password" required="required">
-    <br/>
-    <input type="radio" name="identity" value="member" checked>member<br>
-    <input type="radio" name="identity" value="administrator">administrator<br>
-    <br/>
-    <input type="submit" value="Log in">
+{% extends "base.html" %} {% block head %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/login">Login</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block content %}
+<form role="form" action="/login" method="POST">
+    <div class="form-group">
+        <label for="exampleInputUsername1">
+            Username
+        </label>
+        <input type="username" class="form-control" id="exampleInputUsername1" name="username" placeholder="Username" required="required">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">
+            Password
+        </label>
+        <input type="password" class="form-control" id="exampleInputPassword1" name="password" placeholder="Password" required="required">
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="radio" name="identity" value="member" checked> member
+            <br>
+            <input type="radio" name="identity" value="administrator">administrator
+            <br>
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary">
+        Log in
+    </button>
 </form>
-{% endif %} {% endblock %}
+{% endblock %}
