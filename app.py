@@ -1,9 +1,9 @@
 from flask import Flask, url_for, render_template, request, redirect, session
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy import create_engine, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 
 DB_URI = "mysql+pymysql://root:@127.0.0.1:3306/member"
 Session = sessionmaker(autocommit=False,
@@ -163,18 +163,14 @@ def register():
         session['identity'] = identity
         if identity == 'member':
             rows = session_db.query(func.count(Users.id)).scalar()
-            new_user = Users(id=rows + 1, username=request.form['username'], password=request.form['password'],
-                             email=request.form['email'], telephone=request.form['telephone'],
-                             extra=request.form['extra'])
-            session_db.add(new_user)
-            session_db.commit()
+
         else:
             rows = session_db.query(func.count(Administrator.id)).scalar()
-            new_user = Administrator(id=rows + 1, username=request.form['username'], password=request.form['password'],
-                                     email=request.form['email'], telephone=request.form['telephone'],
-                                     extra=request.form['extra'])
-            session_db.add(new_user)
-            session_db.commit()
+        new_user = Users(id=rows + 1, username=request.form['username'], password=request.form['password'],
+                         email=request.form['email'], telephone=request.form['telephone'],
+                         extra=request.form['extra'])
+        session_db.add(new_user)
+        session_db.commit()
         return render_template('login.html')
     return render_template('register.html')
 
@@ -188,19 +184,21 @@ def logout():
 
     return redirect(url_for('home'))
 
+
 @app.route('/modify', methods=['GET', 'POST'])
 def modify():
     if request.method == 'GET':
         user = session_db.query(Users).all()
-        return render_template('modify.html',users=user)
+        return render_template('modify.html', users=user)
     if request.method == 'POST':
         user = session_db.query(Users).all()
         for i in range(len(user)):
-            user[i].email = request.form['email'+str(i+1)]
-            user[i].telephone = request.form['telephone'+str(i+1)]
-            user[i].extra = request.form['extra'+str(i+1)]
+            user[i].email = request.form['email' + str(i + 1)]
+            user[i].telephone = request.form['telephone' + str(i + 1)]
+            user[i].extra = request.form['extra' + str(i + 1)]
         session_db.commit()
         return redirect(url_for('modify'))
+
 
 if __name__ == '__main__':
     init_db()
