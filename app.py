@@ -203,7 +203,6 @@ def modify():
         return redirect(url_for('modify'))
 
 if __name__ == '__main__':
-    if __name__ == '__main__':
-        init_db()
-        app.secret_key = "MemberSystem"
-        app.run(port=8008)
+    init_db()
+    app.secret_key = "MemberSystem"
+    app.run(port=8008)
