@@ -151,17 +151,31 @@ def register():
     """Register Form"""
     if request.method == 'POST':
         identity = request.form['identity']
-        session['identity'] = identity
         if identity == 'member':
-            rows = session_db.query(func.count(Users.id)).scalar()
-
+            data_username = session_db.query(Users).filter(Users.username == request.form['username']).first()
         else:
-            rows = session_db.query(func.count(Administrator.id)).scalar()
-        new_user = Users(id=rows + 1, username=request.form['username'], password=request.form['password'],
-                         email=request.form['email'], telephone=request.form['telephone'],
-                         extra=request.form['extra'])
-        session_db.add(new_user)
-        session_db.commit()
+            data_username = session_db.query(Administrator).filter(
+                Administrator.username == request.form['username']).first()
+
+        if data_username is not None:
+            return 'Username already exists'
+        else:
+            session['identity'] = identity
+            if identity == 'member':
+                rows = session_db.query(func.count(Users.id)).scalar()
+                new_user = Users(id=rows + 1, username=request.form['username'], password=request.form['password'],
+                                 email=request.form['email'], telephone=request.form['telephone'],
+                                 extra=request.form['extra'])
+
+            else:
+                rows = session_db.query(func.count(Administrator.id)).scalar()
+                new_user = Administrator(id=rows + 1, username=request.form['username'],
+                                         password=request.form['password'],
+                                         email=request.form['email'], telephone=request.form['telephone'],
+                                         extra=request.form['extra'])
+
+            session_db.add(new_user)
+            session_db.commit()
         return render_template('login.html')
     return render_template('register.html')
 
