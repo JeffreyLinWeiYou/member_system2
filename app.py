@@ -69,36 +69,27 @@ def home():
         if session['identity'] == 'member':
             if request.method == 'POST':
                 user = session_db.query(Users).filter(Users.username == session['username']).first()
-                user.password = request.form['password']
-                session['password'] = request.form['password']
-                user.email = request.form['email']
-                user.telephone = request.form['telephone']
-                user.extra = request.form['extra']
-                session_db.commit()
-                return render_template('index.html', username=session['username'], password=user.password,
-                                       email=user.email, telephone=user.telephone,
-                                       extra=user.extra, identity=session['identity'])
-            data_username = session_db.query(Users).filter(Users.username == session['username']).first()
-            return render_template('index.html', username=data_username.username, password=data_username.password,
-                                   email=data_username.email, telephone=data_username.telephone,
-                                   extra=data_username.extra, identity=session['identity'])
         else:
             if request.method == 'POST':
                 user = session_db.query(Administrator).filter(Administrator.username == session['username']).first()
-                user.password = request.form['password']
-                session['password'] = request.form['password']
-                user.email = request.form['email']
-                user.telephone = request.form['telephone']
-                user.extra = request.form['extra']
-                session_db.commit()
-                return render_template('index.html', username=session['username'], password=user.password,
-                                       email=user.email, telephone=user.telephone,
-                                       extra=user.extra, identity=session['identity'])
+
+        if request.method == 'POST':
+            user.password = request.form['password']
+            session['password'] = request.form['password']
+            user.email = request.form['email']
+            user.telephone = request.form['telephone']
+            user.extra = request.form['extra']
+            session_db.commit()
+
+        if session['identity'] == 'member':
+            data_username = session_db.query(Users).filter(Users.username == session['username']).first()
+        else:
             data_username = session_db.query(Administrator).filter(
                 Administrator.username == session['username']).first()
-            return render_template('index.html', username=data_username.username, password=data_username.password,
-                                   email=data_username.email, telephone=data_username.telephone,
-                                   extra=data_username.extra, identity=session['identity'])
+
+        return render_template('index.html', username=data_username.username, password=data_username.password,
+                               email=data_username.email, telephone=data_username.telephone,
+                               extra=data_username.extra, identity=session['identity'])
 
 
 @app.route('/login', methods=['GET', 'POST'])
