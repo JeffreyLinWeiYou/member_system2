@@ -1,9 +1,9 @@
 import random
 import string
 
-from flask import Flask, url_for, render_template, request, redirect, session
+from flask import Flask, url_for, render_template, request, redirect, session, abort
 from flask_mail import Mail, Message
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, BOOLEAN
 from sqlalchemy import create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
@@ -38,14 +38,18 @@ class Users(Base):
     email = Column(String(32))
     telephone = Column(String(32))
     extra = Column(Text)
+    hashconfirm = Column(Text)
+    confirm = Column(BOOLEAN)
 
-    def __init__(self, id, username, password, email, telephone, extra):
+    def __init__(self, id, username, password, email, telephone, extra, hashconfirm, confirm):
         self.id = id
         self.username = username
         self.password = password
         self.email = email
         self.telephone = telephone
         self.extra = extra
+        self.hashconfirm = hashconfirm
+        self.confirm = confirm
 
 
 class Administrator(Base):
@@ -88,11 +92,22 @@ def password_generator(size=8, chars=string.ascii_letters + string.digits):
     return ''.join(random.choice(chars) for i in range(size))
 
 
-def send_mail_new_password(username,new_password,recipient):
+def send_mail_new_password(username, new_password, recipient):
     msg = Message('[Test] {} 密碼重置信件'.format(username), sender='jeffrey.lin.company@gmail.com', recipients=[recipient])
     msg.body = "您的重置密碼為{}".format(new_password)
     mail.send(msg)
+    print('username,password:{}'.format(username, new_password))
     return "Sent"
+
+
+def send_mail_hashpage(username, hashpage, recipient):
+    msg = Message('[Test] {} 密碼重置信件'.format(username), sender='jeffrey.lin.company@gmail.com', recipients=[recipient])
+    msg.body = "請您前往確認網頁!"
+    msg.html = '<a href="http://127.0.0.1:8008/{}">http://127.0.0.1:8008/{}</a>'.format(hashpage, hashpage)
+    mail.send(msg)
+    print('username,password:{}'.format(username, hashpage))
+    return "Sent"
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -125,6 +140,22 @@ def home():
                                extra=data_username.extra, identity=session['identity'])
 
 
+@app.route('/<slug>', methods=['GET'])
+def hashconfirm(slug):
+    if request.method == 'GET':
+        user_confirm = session_db.query(Users).filter(Users.hashconfirm == slug).first()
+        if user_confirm is not None:
+            user_confirm_True = session_db.query(Users).filter(Users.hashconfirm == slug, Users.confirm == 0).first()
+            if user_confirm_True is not None:
+                user_confirm.confirm = 1
+                session_db.commit()
+                return '成功認證!'
+            else:
+                return '您已經認證過!'
+        else:
+            abort(404)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -134,24 +165,26 @@ def login():
         passw = request.form['password']
         identity = request.form['identity']
         if identity == 'member':
-
             data_username = session_db.query(Users).filter(Users.username == name).first()
-            if data_username is not None:
-                data_username_passw = session_db.query(Users).filter(Users.username == name,
-                                                                     Users.password == passw).first()
-                if data_username_passw is not None:
-                    session['logged_in'] = True
-                    session['username'] = name
-                    session['password'] = passw
-                    session['identity'] = 'member'
+            if data_username.confirm == True:
+                if data_username is not None:
+                    data_username_passw = session_db.query(Users).filter(Users.username == name,
+                                                                         Users.password == passw).first()
+                    if data_username_passw is not None:
+                        session['logged_in'] = True
+                        session['username'] = name
+                        session['password'] = passw
+                        session['identity'] = 'member'
 
-                    return redirect(url_for('home'))
+                        return redirect(url_for('home'))
+
+                    else:
+                        return 'Username Exist,but password error'
 
                 else:
-                    return 'Username Exist,but password error'
-
+                    return 'Username Error'
             else:
-                return 'Username Error'
+                return '請先認證過後，再登入'
         else:
             data_username = session_db.query(Administrator).filter(Administrator.username == name).first()
             if data_username is not None:
@@ -189,9 +222,12 @@ def register():
             session['identity'] = identity
             if identity == 'member':
                 rows = session_db.query(func.count(Users.id)).scalar()
+                hashconfirm = password_generator(25)
+                print(hashconfirm)
+                # send_mail_hashpage(request.form['username'],hashconfirm,request.form['email'])
                 new_user = Users(id=rows + 1, username=request.form['username'], password=request.form['password'],
                                  email=request.form['email'], telephone=request.form['telephone'],
-                                 extra=request.form['extra'])
+                                 extra=request.form['extra'], hashconfirm=hashconfirm, confirm=0)
 
             else:
                 rows = session_db.query(func.count(Administrator.id)).scalar()
@@ -249,7 +285,7 @@ def forgetpasswd():
                     new_password = password_generator()
                     data_username_email.password = new_password
                     session_db.commit()
-                    send_mail_new_password(username,new_password,email)
+                    send_mail_new_password(username, new_password, email)
                     return redirect(url_for('login'))
                 else:
                     return 'Username Exist,but email error'
@@ -264,7 +300,7 @@ def forgetpasswd():
                     new_password = password_generator()
                     data_username_email.password = new_password
                     session_db.commit()
-                    send_mail_new_password(username, new_password, email)
+                    # send_mail_new_password(username, new_password, email)
                     return redirect(url_for('login'))
                 else:
                     return 'Username Exist,but email error'
