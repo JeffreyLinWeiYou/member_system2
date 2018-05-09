@@ -1,4 +1,8 @@
+import random
+import string
+
 from flask import Flask, url_for, render_template, request, redirect, session
+from flask_mail import Mail, Message
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy import create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
@@ -11,6 +15,15 @@ Session = sessionmaker(autocommit=False,
                        bind=create_engine(DB_URI))
 session_db = scoped_session(Session)
 app = Flask(__name__)
+
+mail = Mail(app)
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'jeffrey.lin.company@gmail.com'
+app.config['MAIL_PASSWORD'] = 'smart821223'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
 engine = create_engine(DB_URI, max_overflow=5)
 
@@ -60,6 +73,26 @@ def init_db():
 def drop_db():
     Base.metadata.drop_all(engine)
 
+
+def password_generator(size=8, chars=string.ascii_letters + string.digits):
+    """
+    Returns a string of random characters, useful in generating temporary
+    passwords for automated password resets.
+
+    size: default=8; override to provide smaller/larger passwords
+    chars: default=A-Za-z0-9; override to provide more/less diversity
+
+    Credit: Ignacio Vasquez-Abrams
+    Source: http://stackoverflow.com/a/2257449
+    """
+    return ''.join(random.choice(chars) for i in range(size))
+
+
+def send_mail_new_password(username,new_password,recipient):
+    msg = Message('[Test] {} 密碼重置信件'.format(username), sender='jeffrey.lin.company@gmail.com', recipients=[recipient])
+    msg.body = "您的重置密碼為{}".format(new_password)
+    mail.send(msg)
+    return "Sent"
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -196,6 +229,47 @@ def modify():
             user[i].extra = request.form['extra' + str(i + 1)]
         session_db.commit()
         return redirect(url_for('modify'))
+
+
+@app.route('/forgetpasswd', methods=['GET', 'POST'])
+def forgetpasswd():
+    if request.method == 'GET':
+        return render_template('forgotpasswd.html')
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        identity = request.form['identity']
+
+        if identity == 'member':
+            data_username = session_db.query(Users).filter(Users.username == username).first()
+            if data_username is not None:
+                data_username_email = session_db.query(Users).filter(Users.username == username,
+                                                                     Users.email == email).first()
+                if data_username_email is not None:
+                    new_password = password_generator()
+                    data_username_email.password = new_password
+                    session_db.commit()
+                    send_mail_new_password(username,new_password,email)
+                    return redirect(url_for('login'))
+                else:
+                    return 'Username Exist,but email error'
+            else:
+                return 'Username Error'
+        else:
+            data_username = session_db.query(Administrator).filter(Administrator.username == username).first()
+            if data_username is not None:
+                data_username_email = session_db.query(Administrator).filter(Administrator.username == username,
+                                                                             Administrator.email == email).first()
+                if data_username_email is not None:
+                    new_password = password_generator()
+                    data_username_email.password = new_password
+                    session_db.commit()
+                    send_mail_new_password(username, new_password, email)
+                    return redirect(url_for('login'))
+                else:
+                    return 'Username Exist,but email error'
+            else:
+                return 'Username Error'
 
 
 if __name__ == '__main__':
