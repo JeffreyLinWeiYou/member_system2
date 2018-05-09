@@ -112,11 +112,8 @@ def login():
                     session['password'] = passw
                     session['identity'] = 'member'
 
-                    data_username = session_db.query(Users).filter(Users.username == session['username']).first()
-                    return render_template('index.html', username=session['username'],
-                                           password=data_username.password,
-                                           email=data_username.email, telephone=data_username.telephone,
-                                           extra=data_username.extra, identity=session['identity'])
+                    return redirect(url_for('home'))
+
                 else:
                     return 'Username Exist,but password error'
 
@@ -133,12 +130,8 @@ def login():
                     session['password'] = passw
                     session['identity'] = 'administrator'
 
-                    data_username = session_db.query(Administrator).filter(
-                        Administrator.username == session['username']).first()
-                    return render_template('index.html', username=session['username'],
-                                           password=data_username.password,
-                                           email=data_username.email, telephone=data_username.telephone,
-                                           extra=data_username.extra, identity=session['identity'])
+                    return redirect(url_for('home'))
+
                 else:
                     return 'Username Exist,but password error'
 
@@ -208,4 +201,4 @@ def modify():
 if __name__ == '__main__':
     init_db()
     app.secret_key = "MemberSystem"
-    app.run(port=8008)
+    app.run(debug=True, port=8008)
