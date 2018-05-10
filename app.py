@@ -166,8 +166,8 @@ def login():
         identity = request.form['identity']
         if identity == 'member':
             data_username = session_db.query(Users).filter(Users.username == name).first()
-            if data_username.confirm == True:
-                if data_username is not None:
+            if data_username is not None:
+                if data_username.confirm == True:
                     data_username_passw = session_db.query(Users).filter(Users.username == name,
                                                                          Users.password == passw).first()
                     if data_username_passw is not None:
@@ -182,9 +182,9 @@ def login():
                         return 'Username Exist,but password error'
 
                 else:
-                    return 'Username Error'
+                    return '請先認證過後，再登入'
             else:
-                return '請先認證過後，再登入'
+                return 'Username Error'
         else:
             data_username = session_db.query(Administrator).filter(Administrator.username == name).first()
             if data_username is not None:

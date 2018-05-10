@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block head %}
-<div class="container-fluid">
+<div class="container">
     <div class="row">
         <div class="col-md-12">
             <ul class="nav nav-pills">
@@ -27,49 +27,53 @@
     </div>
 </div>
 {% endblock %} {% block content %} {% if session['logged_in'] %}
-<div class="page-header">
-    <h1>
+<div class="container">
+    <div class="page-header">
+        <h1>
         Identity:{{identity}}
     </h1>
-</div>
-<div class="page-header">
-    <h1>
+    </div>
+    <div class="page-header">
+        <h1>
         Username:{{username}}
     </h1>
+    </div>
+    <form role="form" method="POST">
+        <div class="form-group">
+            <label for="exampleInputPassword1">
+                Password
+            </label>
+            <input type="password" class="form-control" id="exampleInputPassword1" name="password" value="{{password}}" required="required">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputEmail1">
+                email
+            </label>
+            <input type="email" class="form-control" id="exampleInputEmail1" name="email" value="{{email}}" required="required">
+        </div>
+        <div class="form-group">
+            <label for="exampleTelephone1">
+                telephone
+            </label>
+            <input type="tel" class="form-control" id="exampleTelephone1" name="telephone" value="{{telephone}}" required="required">
+        </div>
+        <div class="form-group">
+            <label for="exampleText1">
+                extra
+            </label>
+            <input type="text" class="form-control" id="exampleText1" name="extra" value="{{extra}}" required="required">
+        </div>
+        <button type="submit" class="btn btn-primary">
+            modify
+        </button>
+    </form>
 </div>
-<form role="form" method="POST">
-    <div class="form-group">
-        <label for="exampleInputPassword1">
-            Password
-        </label>
-        <input type="password" class="form-control" id="exampleInputPassword1" name="password" value="{{password}}" required="required">
-    </div>
-    <div class="form-group">
-        <label for="exampleInputEmail1">
-            email
-        </label>
-        <input type="email" class="form-control" id="exampleInputEmail1" name="email" value="{{email}}" required="required">
-    </div>
-    <div class="form-group">
-        <label for="exampleTelephone1">
-            telephone
-        </label>
-        <input type="tel" class="form-control" id="exampleTelephone1" name="telephone" value="{{telephone}}" required="required">
-    </div>
-    <div class="form-group">
-        <label for="exampleText1">
-            extra
-        </label>
-        <input type="text" class="form-control" id="exampleText1" name="extra" value="{{extra}}" required="required">
-    </div>
-    <button type="submit" class="btn btn-primary">
-        modify
-    </button>
-</form>
 {% else %}
-<div class="page-header">
-    <h1>
+<div class="container">
+    <div class="page-header">
+        <h1>
         Not login!
     </h1>
+    </div>
 </div>
 {% endif %} {% endblock %}
