@@ -285,7 +285,7 @@ def forgetpasswd():
                     new_password = password_generator()
                     data_username_email.password = new_password
                     session_db.commit()
-                    send_mail_new_password(username, new_password, email)
+                    # send_mail_new_password(username, new_password, email)
                     return redirect(url_for('login'))
                 else:
                     return 'Username Exist,but email error'
