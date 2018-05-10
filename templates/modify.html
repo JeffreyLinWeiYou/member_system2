@@ -16,7 +16,7 @@
         </div>
     </div>
 </div>
-<style>
+<!-- <style>
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
@@ -33,36 +33,38 @@ th {
 tr:nth-child(even) {
     background-color: #dddddd;
 }
-</style>
+</style> -->
 <div class="container">
-    <table>
-        <form role="form" action="/modify" method="POST">
-            <tr>
-                <th>username</th>
-                <th>password</th>
-                <th>email</th>
-                <th>telephone</th>
-                <th>extra</th>
-            </tr>
-            {% for user in users %}
-            <tr>
-                <td>{{user.username}}</td>
-                <td>{{user.password}}</td>
-                <td>
-                    <input type="email" name="email{{user.id}}" value="{{user.email}}" required="required">
-                </td>
-                <td>
-                    <input type="tel" name="telephone{{user.id}}" value="{{user.telephone}}" required="required">
-                </td>
-                <td>
-                    <input type="text" name="extra{{user.id}}" value="{{user.extra}}" required="required">
-                </td>
-            </tr>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">
-                modify
-            </button>
-        </form>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <form role="form" action="/modify" method="POST">
+                <tr>
+                    <th>username</th>
+                    <th>password</th>
+                    <th>email</th>
+                    <th>telephone</th>
+                    <th>extra</th>
+                </tr>
+                {% for user in users %}
+                <tr>
+                    <td>{{user.username}}</td>
+                    <td>{{user.password}}</td>
+                    <td>
+                        <input type="email" name="email{{user.id}}" value="{{user.email}}" required="required">
+                    </td>
+                    <td>
+                        <input type="tel" name="telephone{{user.id}}" value="{{user.telephone}}" required="required">
+                    </td>
+                    <td>
+                        <input type="text" name="extra{{user.id}}" value="{{user.extra}}" required="required">
+                    </td>
+                </tr>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">
+                    modify
+                </button>
+            </form>
+        </table>
+    </div>
 </div>
 {% endblock %}
